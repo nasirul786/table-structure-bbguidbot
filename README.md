@@ -93,3 +93,84 @@ JS is? - Yes, No, Maybe, None - 2
   ]
 }
 ```
+
+## App script
+```js
+function doGet() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Sheet1');
+  var data = sheet.getDataRange().getValues();
+
+  var meta = {};
+  var i = 0;
+
+  // STEP 1: Collect meta (until blank row)
+  while (i < data.length && data[i][0]) {
+    meta[data[i][0]] = data[i][1];
+    i++;
+  }
+
+  // Skip blank row
+  i++;
+
+  // STEP 2: Lessons headers
+  var headers = data[i];
+  i++;
+
+  // STEP 3: Parse lessons
+  var lessons = [];
+  for (; i < data.length; i++) {
+    var row = data[i];
+    if (!row[0]) continue; // skip empty rows
+
+    var obj = {};
+    headers.forEach((header, index) => {
+      obj[header] = row[index];
+    });
+
+    // Parse links (multi-line text)
+    var links = [];
+    if (obj.links) {
+      var linkLines = obj.links.toString().split('\n');
+      linkLines.forEach(line => {
+        var parts = line.split(' - ');
+        if (parts.length === 2) {
+          links.push({ name: parts[0].trim(), url: parts[1].trim() });
+        }
+      });
+    }
+
+    // Parse quizzes (multi-line text)
+    var quizzes = [];
+    if (obj.quizzes) {
+      var quizLines = obj.quizzes.toString().split('\n');
+      quizLines.forEach(line => {
+        var parts = line.split(' - ');
+        if (parts.length === 3) {
+          quizzes.push({
+            question: parts[0].trim(),
+            options: parts[1].split(',').map(opt => opt.trim()),
+            correct: parseInt(parts[2].trim())
+          });
+        }
+      });
+    }
+
+    lessons.push({
+      id: obj.id,
+      title: obj.title,
+      description: obj.description,
+      lesson: obj.lesson,
+      links: links,
+      quizzes: quizzes
+    });
+  }
+
+  var result = {
+    meta: meta,
+    lessons: lessons
+  };
+
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+```
