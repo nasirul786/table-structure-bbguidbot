@@ -95,6 +95,12 @@ JS is? - Yes, No, Maybe, None - 2
 ```
 
 ## App script
+after pasting the app script and deploy as webApp, it will give an url like this:
+https://script.google.com/macros/s/AKfycbys15hFMppJnR-PIRLgKZjuZLsI3flaQaQQLmO7Vx9qinDdbccZjPG_PA8R1bwQe_qhqA/exec
+
+this url will return a json with metadata and lessions.
+example table: Read only:
+https://docs.google.com/spreadsheets/d/e/2PACX-1vQA-UHMxbTmflx0O197KitvuTxeoVao01yT9b6XfAcfV3GU8l20hLmHgp4uae4tdDQr9pxARJQ8KPYz/pubhtml
 ```js
 function doGet() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Sheet1');
